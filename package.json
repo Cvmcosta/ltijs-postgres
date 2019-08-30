@@ -1,0 +1,65 @@
+{
+  "name": "ltijs-postgres",
+  "version": "0.2.0",
+  "description": "Plugin for ltijs to use postgresql instead of mongodb",
+  "main": "index.js",
+  "engineStrict": true,
+  "engines": {
+    "node": ">=8.6.0"
+  },
+  "scripts": {
+    "test": "mocha",
+    "build": "standard 'src/**/*.js' --fix && babel src -d dist",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cvmcosta/ltijs-postgres.git"
+  },
+  "keywords": [
+    "ltijs",
+    "lti",
+    "postgresql",
+    "postgres",
+    "provider",
+    "ims"
+  ],
+  "author": "cvmcosta",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Cvmcosta/ltijs-postgres/issues"
+  },
+  "homepage": "https://github.com/Cvmcosta/ltijs-postgres#readme",
+  "dependencies": {
+    "@babel/runtime": "^7.5.0",
+    "pg": "^7.12.1",
+    "sequelize": "^5.16.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-transform-runtime": "^7.5.0",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/register": "^7.4.4",
+    "babel-eslint": "^10.0.2",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "chai-http": "^4.3.0",
+    "eslint": "^6.0.1",
+    "mocha": "^6.1.4",
+    "nock": "^10.0.6",
+    "sequelize-cli": "^5.5.0",
+    "standard": "^14.0.0"
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "ignore": [
+      "node_modules/",
+      "dist/"
+    ],
+    "env": [
+      "mocha"
+    ]
+  }
+}
