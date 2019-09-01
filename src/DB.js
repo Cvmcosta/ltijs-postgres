@@ -10,8 +10,9 @@ class Database {
   #Models
 
   #ExpireTime = {
-    idToken: 3600 * 24,
-    accessToken: 3600,
+    idtoken: 3600 * 24,
+    contexttoken: 3600 * 24,
+    accesstoken: 3600,
     nonce: 10
   }
 
@@ -41,7 +42,7 @@ class Database {
           type: Sequelize.STRING
         },
         roles: {
-          type: Sequelize.STRING
+          type: Sequelize.ARRAY(Sequelize.STRING)
         },
         userInfo: {
           type: Sequelize.JSONB
@@ -107,7 +108,7 @@ class Database {
           type: Sequelize.STRING
         },
         data: {
-          type: Sequelize.STRING
+          type: Sequelize.STRING(10000)
         }
       }),
       privatekey: this.#sequelize.define('privatekey', {
@@ -119,7 +120,7 @@ class Database {
           type: Sequelize.STRING
         },
         data: {
-          type: Sequelize.STRING
+          type: Sequelize.STRING(10000)
         }
       }),
       accesstoken: this.#sequelize.define('accesstoken', {
@@ -145,6 +146,15 @@ class Database {
     // Sync models to database, creating tables if they do not exist
     await this.#sequelize.sync()
 
+    // Adding Nonce deletion rule to database
+    await this.#sequelize.query('CREATE OR REPLACE RULE "DeleteOldNonce" AS ON INSERT TO public.nonces DO DELETE FROM nonces WHERE (nonces."createdAt" + \'00:00:10\'::interval) < CURRENT_TIMESTAMP;')
+
+    await this.#sequelize.query('CREATE OR REPLACE RULE "DeleteOldIdToken" AS ON INSERT TO public.idtokens DO DELETE FROM idtokens WHERE (idtokens."createdAt" + \'1 day\'::interval) < CURRENT_TIMESTAMP;')
+
+    await this.#sequelize.query('CREATE OR REPLACE RULE "DeleteOldContextToken" AS ON INSERT TO public.contexttokens DO DELETE FROM contexttokens WHERE (contexttokens."createdAt" + \'1 day\'::interval) < CURRENT_TIMESTAMP;')
+
+    await this.#sequelize.query('CREATE OR REPLACE RULE "DeleteOldAccessToken" AS ON INSERT TO public.accesstokens DO DELETE FROM accesstokens WHERE (accesstokens."createdAt" + \'01:00:00\'::interval) < CURRENT_TIMESTAMP;')
+
     return true
   }
 
@@ -160,15 +170,24 @@ class Database {
     const result = await this.#Models[table].findAll({ where: info, raw: true })
 
     // Decrypt if encrypted
-    if (ENCRYPTIONKEY) {
-      for (const i in result) {
-        const temp = result[i]
-        result[i] = JSON.parse(await this.Decrypt(result[i].data, result[i].iv, ENCRYPTIONKEY))
-        if (temp.createdAt) {
-          const createdAt = Date.parse(temp.createdAt)
-          result[i].createdAt = createdAt
+    for (const i in result) {
+      const temp = result[i]
+      if (temp.createdAt) {
+        const createdAt = Date.parse(temp.createdAt)
+        const elapsedTime = (Date.now() - createdAt) / 1000
+
+        if ((table === 'accesstoken' || table === 'idtoken' || table === 'contexttoken' || table === 'nonce') && elapsedTime >= this.#ExpireTime[table]) {
+          this.Delete(table, info)
+          result.splice(i, 1)
+          continue
         }
+        result[i].createdAt = createdAt
       }
+      if (temp.updatedAt) {
+        const updatedAt = Date.parse(temp.updatedAt)
+        result[i].updatedAt = updatedAt
+      }
+      if (ENCRYPTIONKEY) result[i] = JSON.parse(await this.Decrypt(result[i].data, result[i].iv, ENCRYPTIONKEY))
     }
 
     // Check if query was successful
@@ -185,21 +204,24 @@ class Database {
      */
   async Insert (ENCRYPTIONKEY, table, item, index) {
     if (!table || !item || (ENCRYPTIONKEY && !index)) throw new Error('Missing argument.')
-
-    // Encrypt if encryption key is present
-    let newDocData = item
-    if (ENCRYPTIONKEY) {
-      const encrypted = await this.Encrypt(JSON.stringify(item), ENCRYPTIONKEY)
-      newDocData = {
-        [Object.keys(index)[0]]: Object.values(index)[0],
-        iv: encrypted.iv,
-        data: encrypted.data
+    try {
+      // Encrypt if encryption key is present
+      let newDocData = item
+      if (ENCRYPTIONKEY) {
+        const encrypted = await this.Encrypt(JSON.stringify(item), ENCRYPTIONKEY)
+        newDocData = {
+          [Object.keys(index)[0]]: Object.values(index)[0],
+          iv: encrypted.iv,
+          data: encrypted.data
+        }
       }
+
+      await this.#Models[table].create(newDocData)
+      return true
+    } catch (err) {
+      console.log(err)
+      return false
     }
-
-    await this.#Models[table].create(newDocData)
-
-    return true
   }
 
   /**

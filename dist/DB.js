@@ -29,8 +29,9 @@ class Database {
     _ExpireTime.set(this, {
       writable: true,
       value: {
-        idToken: 3600 * 24,
-        accessToken: 3600,
+        idtoken: 3600 * 24,
+        contexttoken: 3600 * 24,
+        accesstoken: 3600,
         nonce: 10
         /**
          * @description Mongodb configuration setup
@@ -66,7 +67,7 @@ class Database {
           type: Sequelize.STRING
         },
         roles: {
-          type: Sequelize.STRING
+          type: Sequelize.ARRAY(Sequelize.STRING)
         },
         userInfo: {
           type: Sequelize.JSONB
@@ -132,7 +133,7 @@ class Database {
           type: Sequelize.STRING
         },
         data: {
-          type: Sequelize.STRING
+          type: Sequelize.STRING(10000)
         }
       }),
       privatekey: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('privatekey', {
@@ -144,7 +145,7 @@ class Database {
           type: Sequelize.STRING
         },
         data: {
-          type: Sequelize.STRING
+          type: Sequelize.STRING(10000)
         }
       }),
       accesstoken: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('accesstoken', {
@@ -167,7 +168,12 @@ class Database {
       }) // Sync models to database, creating tables if they do not exist
 
     });
-    await (0, _classPrivateFieldGet2.default)(this, _sequelize).sync();
+    await (0, _classPrivateFieldGet2.default)(this, _sequelize).sync(); // Adding Nonce deletion rule to database
+
+    await (0, _classPrivateFieldGet2.default)(this, _sequelize).query('CREATE OR REPLACE RULE "DeleteOldNonce" AS ON INSERT TO public.nonces DO DELETE FROM nonces WHERE (nonces."createdAt" + \'00:00:10\'::interval) < CURRENT_TIMESTAMP;');
+    await (0, _classPrivateFieldGet2.default)(this, _sequelize).query('CREATE OR REPLACE RULE "DeleteOldIdToken" AS ON INSERT TO public.idtokens DO DELETE FROM idtokens WHERE (idtokens."createdAt" + \'1 day\'::interval) < CURRENT_TIMESTAMP;');
+    await (0, _classPrivateFieldGet2.default)(this, _sequelize).query('CREATE OR REPLACE RULE "DeleteOldContextToken" AS ON INSERT TO public.contexttokens DO DELETE FROM contexttokens WHERE (contexttokens."createdAt" + \'1 day\'::interval) < CURRENT_TIMESTAMP;');
+    await (0, _classPrivateFieldGet2.default)(this, _sequelize).query('CREATE OR REPLACE RULE "DeleteOldAccessToken" AS ON INSERT TO public.accesstokens DO DELETE FROM accesstokens WHERE (accesstokens."createdAt" + \'01:00:00\'::interval) < CURRENT_TIMESTAMP;');
     return true;
   }
   /**
@@ -185,16 +191,28 @@ class Database {
       raw: true
     }); // Decrypt if encrypted
 
-    if (ENCRYPTIONKEY) {
-      for (const i in result) {
-        const temp = result[i];
-        result[i] = JSON.parse((await this.Decrypt(result[i].data, result[i].iv, ENCRYPTIONKEY)));
+    for (const i in result) {
+      const temp = result[i];
 
-        if (temp.createdAt) {
-          const createdAt = Date.parse(temp.createdAt);
-          result[i].createdAt = createdAt;
+      if (temp.createdAt) {
+        const createdAt = Date.parse(temp.createdAt);
+        const elapsedTime = (Date.now() - createdAt) / 1000;
+
+        if ((table === 'accesstoken' || table === 'idtoken' || table === 'contexttoken' || table === 'nonce') && elapsedTime >= (0, _classPrivateFieldGet2.default)(this, _ExpireTime)[table]) {
+          this.Delete(table, info);
+          result.splice(i, 1);
+          continue;
         }
+
+        result[i].createdAt = createdAt;
       }
+
+      if (temp.updatedAt) {
+        const updatedAt = Date.parse(temp.updatedAt);
+        result[i].updatedAt = updatedAt;
+      }
+
+      if (ENCRYPTIONKEY) result[i] = JSON.parse((await this.Decrypt(result[i].data, result[i].iv, ENCRYPTIONKEY)));
     } // Check if query was successful
 
 
@@ -211,21 +229,27 @@ class Database {
 
 
   async Insert(ENCRYPTIONKEY, table, item, index) {
-    if (!table || !item || ENCRYPTIONKEY && !index) throw new Error('Missing argument.'); // Encrypt if encryption key is present
+    if (!table || !item || ENCRYPTIONKEY && !index) throw new Error('Missing argument.');
 
-    let newDocData = item;
+    try {
+      // Encrypt if encryption key is present
+      let newDocData = item;
 
-    if (ENCRYPTIONKEY) {
-      const encrypted = await this.Encrypt(JSON.stringify(item), ENCRYPTIONKEY);
-      newDocData = {
-        [Object.keys(index)[0]]: Object.values(index)[0],
-        iv: encrypted.iv,
-        data: encrypted.data
-      };
+      if (ENCRYPTIONKEY) {
+        const encrypted = await this.Encrypt(JSON.stringify(item), ENCRYPTIONKEY);
+        newDocData = {
+          [Object.keys(index)[0]]: Object.values(index)[0],
+          iv: encrypted.iv,
+          data: encrypted.data
+        };
+      }
+
+      await (0, _classPrivateFieldGet2.default)(this, _Models)[table].create(newDocData);
+      return true;
+    } catch (err) {
+      console.log(err);
+      return false;
     }
-
-    await (0, _classPrivateFieldGet2.default)(this, _Models)[table].create(newDocData);
-    return true;
   }
   /**
      * @description Assign value to item in database
