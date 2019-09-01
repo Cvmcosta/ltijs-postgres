@@ -19,9 +19,14 @@ class Database {
   /**
    * @description Mongodb configuration setup
    * @param {Object} database - Configuration object
+   * @param {String} database.database - Database name
+   * @param {String} database.user - Database username
+   * @param {String} database.pass - Database password
+   * @param {String} database.host - Database host
    */
   constructor (database) {
-    this.#sequelize = new Sequelize('cvm', 'postgres', '123456', { host: 'localhost', dialect: 'postgres', logging: false })
+    if (!database || !database.database || !database.user || !database.pass || !database.host) throw new Error('Missing arguments.')
+    this.#sequelize = new Sequelize(database.database, database.user, database.pass, { host: database.host, dialect: 'postgres', logging: false })
   }
 
   /**

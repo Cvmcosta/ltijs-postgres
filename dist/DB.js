@@ -36,13 +36,18 @@ class Database {
         /**
          * @description Mongodb configuration setup
          * @param {Object} database - Configuration object
+         * @param {String} database.database - Database name
+         * @param {String} database.user - Database username
+         * @param {String} database.pass - Database password
+         * @param {String} database.host - Database host
          */
 
       }
     });
 
-    (0, _classPrivateFieldSet2.default)(this, _sequelize, new Sequelize('cvm', 'postgres', '123456', {
-      host: 'localhost',
+    if (!database || !database.database || !database.user || !database.pass || !database.host) throw new Error('Missing arguments.');
+    (0, _classPrivateFieldSet2.default)(this, _sequelize, new Sequelize(database.database, database.user, database.pass, {
+      host: database.host,
       dialect: 'postgres',
       logging: false
     }));
