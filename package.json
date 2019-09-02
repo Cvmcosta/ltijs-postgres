@@ -1,5 +1,5 @@
 {
-  "name": "ltijs-postgres",
+  "name": "ltijs-postgresql",
   "version": "1.0.0",
   "description": "Plugin for ltijs to use postgresql instead of mongodb",
   "main": "index.js",

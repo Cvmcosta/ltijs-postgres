@@ -44,7 +44,7 @@ This package allows [LTIJS](https://cvmcosta.github.io/ltijs) to work with the p
 ## Installation
 
 ```shell
-$ npm install ltijs-postgres
+$ npm install ltijs-postgresql
 ```
 
 ---
@@ -65,7 +65,7 @@ $ npm install ltijs-postgres
 
 // Require Provider 
 const LTI = require('ltijs').Provider
-const Database = require('ltijs-postgres')
+const Database = require('ltijs-postgresql')
 
 // Instantiate and configure plugin
 const db = new Database({
