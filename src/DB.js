@@ -25,7 +25,7 @@ class Database {
    * @param {String} database.host - Database host
    */
   constructor (database) {
-    if (!database || !database.database || !database.user || !database.pass || !database.host) throw new Error('Missing arguments.')
+    if (!database || !database.database || !database.user || (database.pass === undefined) || !database.host) throw new Error('Missing arguments.')
     this.#sequelize = new Sequelize(database.database, database.user, database.pass, { host: database.host, dialect: 'postgres', logging: false })
   }
 
