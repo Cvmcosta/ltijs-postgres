@@ -62,17 +62,17 @@ class Database {
     (0, _classPrivateFieldSet2.default)(this, _Models, {
       idtoken: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('idtoken', {
         iss: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         issuer_code: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         user: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         roles: {
-          type: Sequelize.ARRAY(Sequelize.STRING)
+          type: Sequelize.ARRAY(Sequelize.TEXT)
         },
         userInfo: {
           type: Sequelize.JSONB
@@ -89,11 +89,11 @@ class Database {
       }),
       contexttoken: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('contexttoken', {
         path: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         user: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         context: {
           type: Sequelize.JSONB
@@ -107,23 +107,23 @@ class Database {
       }),
       platform: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('platform', {
         platformName: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         platformUrl: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         clientId: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         authEndpoint: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         accesstokenEndpoint: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         kid: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         authConfig: {
           type: Sequelize.JSONB
@@ -131,43 +131,43 @@ class Database {
       }),
       publickey: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('publickey', {
         kid: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         iv: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         data: {
-          type: Sequelize.STRING(10000)
+          type: Sequelize.TEXT
         }
       }),
       privatekey: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('privatekey', {
         kid: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         iv: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         data: {
-          type: Sequelize.STRING(10000)
+          type: Sequelize.TEXT
         }
       }),
       accesstoken: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('accesstoken', {
         platformUrl: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         iv: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         data: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         }
       }),
       nonce: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('nonce', {
         nonce: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         }
       }) // Sync models to database, creating tables if they do not exist
