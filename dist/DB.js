@@ -45,7 +45,7 @@ class Database {
       }
     });
 
-    if (!database || !database.database || !database.user || !database.pass || !database.host) throw new Error('Missing arguments.');
+    if (!database || !database.database || !database.user || database.pass === undefined || !database.host) throw new Error('Missing arguments.');
     (0, _classPrivateFieldSet2.default)(this, _sequelize, new Sequelize(database.database, database.user, database.pass, {
       host: database.host,
       dialect: 'postgres',
