@@ -37,17 +37,17 @@ class Database {
     this.#Models = {
       idtoken: this.#sequelize.define('idtoken', {
         iss: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         issuer_code: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         user: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         roles: {
-          type: Sequelize.ARRAY(Sequelize.STRING)
+          type: Sequelize.ARRAY(Sequelize.TEXT)
         },
         userInfo: {
           type: Sequelize.JSONB
@@ -64,11 +64,11 @@ class Database {
       }),
       contexttoken: this.#sequelize.define('contexttoken', {
         path: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         user: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         context: {
           type: Sequelize.JSONB
@@ -82,23 +82,23 @@ class Database {
       }),
       platform: this.#sequelize.define('platform', {
         platformName: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         platformUrl: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         clientId: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         authEndpoint: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         accesstokenEndpoint: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         kid: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         authConfig: {
           type: Sequelize.JSONB
@@ -106,43 +106,43 @@ class Database {
       }),
       publickey: this.#sequelize.define('publickey', {
         kid: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         iv: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         data: {
-          type: Sequelize.STRING(10000)
+          type: Sequelize.TEXT
         }
       }),
       privatekey: this.#sequelize.define('privatekey', {
         kid: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         iv: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         data: {
-          type: Sequelize.STRING(10000)
+          type: Sequelize.TEXT
         }
       }),
       accesstoken: this.#sequelize.define('accesstoken', {
         platformUrl: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         },
         iv: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         },
         data: {
-          type: Sequelize.STRING
+          type: Sequelize.TEXT
         }
       }),
       nonce: this.#sequelize.define('nonce', {
         nonce: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           primaryKey: true
         }
       })
