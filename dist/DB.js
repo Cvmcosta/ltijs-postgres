@@ -32,7 +32,8 @@ class Database {
         idtoken: 3600 * 24,
         contexttoken: 3600 * 24,
         accesstoken: 3600,
-        nonce: 10
+        nonce: 10,
+        validation: 60
         /**
          * @description Mongodb configuration setup
          * @param {Object} database - Configuration object
@@ -49,7 +50,7 @@ class Database {
     (0, _classPrivateFieldSet2.default)(this, _sequelize, new Sequelize(database.database, database.user, database.pass, {
       host: database.host,
       dialect: 'postgres',
-      logging: false
+      logging: console.log
     }));
   }
   /**
@@ -65,7 +66,7 @@ class Database {
           type: Sequelize.TEXT,
           primaryKey: true
         },
-        issuer_code: {
+        issuerCode: {
           type: Sequelize.TEXT
         },
         user: {
@@ -75,6 +76,9 @@ class Database {
           type: Sequelize.ARRAY(Sequelize.TEXT)
         },
         userInfo: {
+          type: Sequelize.JSONB
+        },
+        lis: {
           type: Sequelize.JSONB
         },
         platformInfo: {
@@ -95,6 +99,12 @@ class Database {
         user: {
           type: Sequelize.TEXT
         },
+        deploymentId: {
+          type: Sequelize.TEXT
+        },
+        targetLinkUri: {
+          type: Sequelize.TEXT
+        },
         context: {
           type: Sequelize.JSONB
         },
@@ -102,6 +112,18 @@ class Database {
           type: Sequelize.JSONB
         },
         custom: {
+          type: Sequelize.JSONB
+        },
+        launchPresentation: {
+          type: Sequelize.JSONB
+        },
+        messageType: {
+          type: Sequelize.TEXT
+        },
+        version: {
+          type: Sequelize.TEXT
+        },
+        deepLinkingSettings: {
           type: Sequelize.JSONB
         }
       }),
@@ -158,6 +180,9 @@ class Database {
           type: Sequelize.TEXT,
           primaryKey: true
         },
+        scopes: {
+          type: Sequelize.TEXT
+        },
         iv: {
           type: Sequelize.TEXT
         },
@@ -169,6 +194,15 @@ class Database {
         nonce: {
           type: Sequelize.TEXT,
           primaryKey: true
+        }
+      }),
+      validation: (0, _classPrivateFieldGet2.default)(this, _sequelize).define('validation', {
+        state: {
+          type: Sequelize.TEXT,
+          primaryKey: true
+        },
+        iss: {
+          type: Sequelize.TEXT
         }
       }) // Sync models to database, creating tables if they do not exist
 
@@ -249,6 +283,9 @@ class Database {
         };
       }
 
+       console.log(_Models);
+       console.log(table);
+
       await (0, _classPrivateFieldGet2.default)(this, _Models)[table].create(newDocData);
       return true;
     } catch (err) {
@@ -299,6 +336,7 @@ class Database {
   async Delete(table, info) {
     // Parameter check
     if (!table || !info) throw new Error('Missing argument.');
+    console.log(table);
     await (0, _classPrivateFieldGet2.default)(this, _Models)[table].destroy({
       where: info
     });
