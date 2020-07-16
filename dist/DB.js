@@ -50,7 +50,7 @@ class Database {
     (0, _classPrivateFieldSet2.default)(this, _sequelize, new Sequelize(database.database, database.user, database.pass, {
       host: database.host,
       dialect: 'postgres',
-      logging: console.log
+      logging: false
     }));
   }
   /**
@@ -336,7 +336,6 @@ class Database {
   async Delete(table, info) {
     // Parameter check
     if (!table || !info) throw new Error('Missing argument.');
-    console.log(table);
     await (0, _classPrivateFieldGet2.default)(this, _Models)[table].destroy({
       where: info
     });
